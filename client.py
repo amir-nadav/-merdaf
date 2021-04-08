@@ -1,5 +1,5 @@
 import socket
-
+import time
 HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
@@ -10,6 +10,7 @@ ADDR = (SERVER, PORT)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
+
 def send(msg):
     massage = msg.encode(FORMAT)
     msg_length = len(massage)
@@ -19,15 +20,28 @@ def send(msg):
     client.send(massage)
     re = client.recv(2048).decode(FORMAT)
     print(re)
-    
 
-while True:
-    msg = input('to start, type start. to disconnect press * ')
-    if msg == '*':
-        send(DISCONNECT_MESSAGE)
-        break
-    else:
-        send(msg)
-
-
-
+msg = input('to start, type start. to disconnect press * ')
+send(msg)
+if msg == '*':
+    send(DISCONNECT_MESSAGE)
+elif msg=="start":
+    current_time1 = time.localtime().tm_min
+    print(current_time1)
+    while True:
+            re = client.recv(2048).decode(FORMAT)
+            print(re)
+            answer=input("type your answer: ")
+            if answer == "*":
+                send(DISCONNECT_MESSAGE)
+            client.send(answer.encode())
+            re = client.recv(2048).decode(FORMAT)
+            print(re)
+            current_time=time.localtime().tm_min
+            current_time2=str(time.localtime())
+            if current_time==current_time1+1:
+                client.send(current_time2.encode())
+                print(current_time2)
+                break
+            else:
+                pass
