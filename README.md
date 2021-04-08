@@ -1,1 +1,1 @@
-# we are making a trivia contest that you can play from different computers
+# a trivia game that you can play from different devices
