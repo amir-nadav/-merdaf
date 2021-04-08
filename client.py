@@ -25,8 +25,8 @@ msg = input('to start, type start. to disconnect press * ')
 send(msg)
 if msg == '*':
     send(DISCONNECT_MESSAGE)
-elif msg=="start":
-    current_time1 = time.localtime().tm_min
+elif msg == "start":
+    current_time1 = time.localtime()
     print(current_time1)
     while True:
             re = client.recv(2048).decode(FORMAT)
@@ -37,9 +37,9 @@ elif msg=="start":
             client.send(answer.encode())
             re = client.recv(2048).decode(FORMAT)
             print(re)
-            current_time=time.localtime().tm_min
+            current_time=time.localtime()
             current_time2=str(time.localtime())
-            if current_time==current_time1+1:
+            if current_time.tm_min==current_time1.tm_min + 1 and current_time.tm_sec == current_time1.tm_sec:
                 client.send(current_time2.encode())
                 print(current_time2)
                 break
