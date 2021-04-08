@@ -31,16 +31,16 @@ class question():
         dicte.pop(self.quest,self.answer)
 
 q1 = question()
-q2=question()
-q3=question()
-q4=question()
-q5=question()
-q6=question()
-q7=question()
-q8=question()
-q9=question()
-q10=question()
-question_list=[q1,q2,q3,q4,q5,q6,q7,q8,q9,q10]
+q2 = question()
+q3 = question()
+q4 = question()
+q5 = question()
+q6 = question()
+q7 = question()
+q8 = question()
+q9 = question()
+q10 = question()
+question_list=[q1, q2, q3, q4, q5, q6, q7, q8, q9, q10]
 def handle_client(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected.")
     welcome_msg = "Welcome to our game!!!"
@@ -65,28 +65,34 @@ def handle_client(conn, addr):
 
     conn.close()
 
-def chack(q,player_answer):
+def check(q ,player_answer):
     if q.answer==player_answer:
-        massege="you were correct"
+        massege="correct"
     else:
-        massege="you were incorrect"
+        massege="incorrect"
+
     return massege
 
 def game(conn, addr):
-    current_time=time.localtime().tm_min
+    r_count, w_count = 0, 0
+    current_time = time.localtime().tm_min
     print(current_time)
     conn.send("hello!!!".encode(FORMAT))
     for i in range(len(question_list)):
         time.sleep(0.5)
-        ran=random.choice(question_list)
+        ran = random.choice(question_list)
         question_list.remove(ran)
         conn.send(ran.quest.encode(FORMAT))
-        player1_answer=conn.recv(1024).decode(FORMAT)
-        massege=chack(ran,player1_answer)
+        player1_answer = conn.recv(1024).decode(FORMAT)
+        massege = check(ran ,player1_answer)
+        if massege == 'correct':
+            r_count += 1
+        else:
+            w_count += 1
         conn.send(massege.encode(FORMAT))
-        current_time1=time.localtime().tm_min
-        print(current_time1)
-        if current_time1==current_time+1:
+        current_time1= str(time.localtime().tm_min) + ':' + str(time.localtime().tm_sec)
+        print(current_time1, r_count, w_count)
+        if current_time1 == current_time+1:
             timeing=conn.recv(1024).decode(FORMAT)
             print(timeing)
             break
