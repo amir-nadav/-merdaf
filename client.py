@@ -3,6 +3,7 @@ import time
 HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
+MOUNY=5000
 DISCONNECT_MESSAGE = "!DISCONNECT"
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
@@ -26,8 +27,9 @@ send(msg)
 if msg == '*':
     send(DISCONNECT_MESSAGE)
 elif msg == "start":
-    current_time1 = time.localtime()
-    print(current_time1)
+    current_time=time.localtime().tm_sec
+    current_time2= time.localtime().tm_min
+    print(current_time2)
     while True:
             re = client.recv(2048).decode(FORMAT)
             print(re)
@@ -35,13 +37,23 @@ elif msg == "start":
             if answer == "*":
                 send(DISCONNECT_MESSAGE)
             client.send(answer.encode())
+            current_time3=time.localtime().tm_min
+            current_time1=time.localtime().tm_sec
             re = client.recv(2048).decode(FORMAT)
             print(re)
-            current_time=time.localtime()
-            current_time2=str(time.localtime())
-            if current_time.tm_min==current_time1.tm_min + 1 and current_time.tm_sec == current_time1.tm_sec:
-                client.send(current_time2.encode())
-                print(current_time2)
+            if current_time3==current_time2+1:
+                time.sleep(0.3)
+                send1=client.recv(2048).decode(FORMAT)
+                print("you've erned:",send1,"₪")
                 break
-            else:
-                pass
+    round = input("how much mony you would like? 1-5000,2-7000,3-0000")
+    round = str(round)
+    client.send(round.encode())
+    round=int(round)
+    for i in range(round):
+        print(client.recv(1024).decode())
+        answerhard = input("enter your enswer: ")
+        client.send(answerhard.encode())
+    print(client.recv(1024).decode())
+
+
