@@ -49,25 +49,6 @@ class hardquestion():
         hardict.pop(self.answer,self.question)
 
 
-q1 = question()
-q2 = question()
-q3 = question()
-q4 = question()
-q5 = question()
-q6 = question()
-q7 = question()
-q8 = question()
-q9 = question()
-q10 = question()
-
-qu1 = hardquestion()
-qu2 = hardquestion()
-qu3 = hardquestion()
-qu4 = hardquestion()
-
-question_list = [q1, q2, q3, q4, q5, q6, q7, q8, q9, q10]
-hardquest = [qu1, qu2, qu3, qu4]
-
 
 def handle_client(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected.")
@@ -77,6 +58,7 @@ def handle_client(conn, addr):
         if msg_length:
             msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode(FORMAT)
+            print(f"[{addr}] {msg}")
             if msg == DISCONNECT_MESSAGE:
                 conn.send('Bye'.encode(FORMAT))
                 conn.close()
@@ -86,8 +68,6 @@ def handle_client(conn, addr):
             else:
                 conn.send("no function".encode(FORMAT))
 
-            print(f"[{addr}] {msg}")
-
     conn.close()
 
 def check(q ,player_answer):
@@ -95,7 +75,9 @@ def check(q ,player_answer):
         massage="correct"
     else:
         massage="incorrect"
-
+        if player_answer == '*':
+            conn.send('Bye'.encode(FORMAT))
+            conn.close()
     return massage
 
 def game(conn, addr):
@@ -106,17 +88,16 @@ def game(conn, addr):
     print(f"[TIME] player started first round at {start_time}")
     conn.send("welcome to our game!".encode(FORMAT))
 
-    for i in range(len(question_list)):
+    for i in range(10):
         current_time = time.time()
 
-        ran = random.choice(question_list)
-        question_list.remove(ran)
-        conn.send(ran.quest.encode(FORMAT))
+        qna = question()
+        conn.send(qna.quest.encode(FORMAT))
         time.sleep(0.1)
 
         conn.send((str(60 - (current_time-start_time))).encode(FORMAT))
-        player1_answer = conn.recv(1024).decode(FORMAT)
-        massage = check(ran ,player1_answer)
+        player_answer = conn.recv(1024).decode(FORMAT)
+        massage = check(qna ,player_answer)
         current_time = time.time()
 
         if massage == 'correct':
