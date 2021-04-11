@@ -8,27 +8,46 @@ SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
+MONEY=5000
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
-dicte={
-    "who i am?":" the server",
-    "are you stupid?":"yes",
-    "this is cool?":"yes",
-    "are you pretty?":"no",
-    "i am pretty?":"yes",
-    "hiii":"hiii",
-    "friends":"joey",
-    "am i old?":"no",
-    "are you old?":"yes",
-    "this is fun?":"of course"
-}
+esaydict={
+    "Who I am?" : "the server",
+    "Are you stupid?" : "yes",
+    "This is cool?" : "yes",
+    "Are you pretty?" : "no",
+    "Am I pretty?" : "yes",
+    "hiii" : "hiii",
+    "friends" : "joey",
+    "Am I old?" : "no",
+    "Are you old?" : "yes",
+    "This is fun?" : "of course"
+    }
+
+
+hardict={
+   "What is israel?" : "a country",
+    "What is god" : "everything",
+    "When did world war 2 started?" : "1940",
+    "What is 'A'" : "a letter",
+    }
+
+
 class question():
     def __init__(self):
-        self.quest,self.answer =random.choice(list(dicte.items()))
+        self.quest,self.answer =random.choice(list(esaydict.items()))
         self.self=self.answer,self.quest
-        dicte.pop(self.quest,self.answer)
+        esaydict.pop(self.quest,self.answer)
+
+
+class hardquestion():
+    def __init__(self):
+        self.question,self.answer=random.choice(list(hardict.items()))
+        self.self=self.answer,self.question
+        hardict.pop(self.answer,self.question)
+
 
 q1 = question()
 q2 = question()
@@ -40,13 +59,19 @@ q7 = question()
 q8 = question()
 q9 = question()
 q10 = question()
-question_list=[q1, q2, q3, q4, q5, q6, q7, q8, q9, q10]
+
+qu1 = hardquestion()
+qu2 = hardquestion()
+qu3 = hardquestion()
+qu4 = hardquestion()
+
+question_list = [q1, q2, q3, q4, q5, q6, q7, q8, q9, q10]
+hardquest = [qu1, qu2, qu3, qu4]
+
+
 def handle_client(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected.")
-    welcome_msg = "Welcome to our game!!!"
     connected = True
-    seccese = "you are right"
-    fail = "you are wrong"
     while connected:
         msg_length = conn.recv(HEADER).decode(FORMAT)
         if msg_length:
@@ -67,35 +92,67 @@ def handle_client(conn, addr):
 
 def check(q ,player_answer):
     if q.answer==player_answer:
-        massege="correct"
+        massage="correct"
     else:
-        massege="incorrect"
+        massage="incorrect"
 
-    return massege
+    return massage
 
 def game(conn, addr):
     r_count, w_count = 0, 0
-    current_time = time.localtime().tm_min
-    print(current_time)
-    conn.send("hello!!!".encode(FORMAT))
+    r_hardcount,w_hardcount=0,0
+    start_time = time.time()
+
+    print(f"[TIME] player started first round at {start_time}")
+    conn.send("welcome to our game!".encode(FORMAT))
+
     for i in range(len(question_list)):
-        time.sleep(0.5)
+        current_time = time.time()
+
         ran = random.choice(question_list)
         question_list.remove(ran)
         conn.send(ran.quest.encode(FORMAT))
+        time.sleep(0.1)
+
+        conn.send((str(60 - (current_time-start_time))).encode(FORMAT))
         player1_answer = conn.recv(1024).decode(FORMAT)
-        massege = check(ran ,player1_answer)
-        if massege == 'correct':
+        massage = check(ran ,player1_answer)
+        current_time = time.time()
+
+        if massage == 'correct':
             r_count += 1
         else:
             w_count += 1
-        conn.send(massege.encode(FORMAT))
-        current_time1= str(time.localtime().tm_min) + ':' + str(time.localtime().tm_sec)
-        print(current_time1, r_count, w_count)
-        if current_time1 == current_time+1:
-            timeing=conn.recv(1024).decode(FORMAT)
-            print(timeing)
+        
+        print(f"[SCORING] right:{r_count} wrong:{w_count}")
+
+        if current_time - start_time >= 60:
+            amount = r_count*MONEY
+            conn.send(f"{massage}, you won {amount}₪".encode())
+            print(f"[MONEY]{addr} won {amount}₪")
             break
+        else:
+            conn.send(massage.encode(FORMAT))
+    
+    '''
+    howmuch = int(conn.recv(1024).decode())
+    for i in range(howmuch):
+        ran1 = random.choice(hardquest)
+        conn.send(ran1.question.encode(FORMAT))
+        hardquest.remove(ran1)
+        player1_hardanswer = conn.recv(1024).decode(FORMAT)
+        messege = check(ran1, player1_hardanswer)
+        if messege == 'correct':
+            r_hardcount += 1
+        else:
+            w_hardcount += 1
+    total=r_hardcount * MONEY
+    string = str(f"you erend in this round: {total}")
+    conn.send(string.encode())
+    print(f"[MONEY] {addr} won {total}₪")
+    '''
+
+
 
 def start():
     server.listen()
@@ -104,6 +161,8 @@ def start():
         conn, addr = server.accept()
         thread = threading.Thread(target=handle_client, args=(conn, addr))
         thread.start()
+        thread_list=[]
+        thread_list.append(thread)
         print(f"[ACTIVE CINECTION] {threading.activeCount() - 1}")
 print('[STARTING] server is starting...')
 start()
